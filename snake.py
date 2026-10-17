@@ -44,6 +44,7 @@ def starting_snake():
 # this is a list of tuples. feel free to ask if you have questions about it!
 # the front of the list (0 indexed) is going to be the head
 positions = starting_snake()
+positions = starting_snake()
 
 # for this project we will be using numbers for the orthogonal directions for simpolicity sake
 # more specifically, -1 => left; 1 => right; -2 => up; 2 => down
@@ -51,6 +52,7 @@ direction = 1
 last_direction = 1
 
 def reset():
+    p = starting_snake()
     p = starting_snake()
     d = 1
 
