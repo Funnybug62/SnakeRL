@@ -35,9 +35,16 @@ def draw_food(surface, fp):
     rect = pygame.Rect(fx * CELL_SIZE, fy * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     pygame.draw.rect(surface, FOOD_COLOR, rect)
 
+# the snake starts in the middle of the board, 3 long, facing right
+def starting_snake():
+    cx = GRID_WIDTH // 2
+    cy = GRID_HEIGHT // 2
+
+    return [(cx, cy), (cx - 1, cy), (cx - 2, cy)]
+
 # this is a list of tuples. feel free to ask if you have questions about it!
 # the front of the list (0 indexed) is going to be the head
-positions = [(3, 4), (2, 4), (1, 4)]
+positions = starting_snake()
 
 # for this project we will be using numbers for the orthogonal directions for simpolicity sake
 # more specifically, -1 => left; 1 => right; -2 => up; 2 => down
@@ -45,7 +52,7 @@ direction = 1
 last_direction = 1
 
 def reset():
-    p = [(3, 4), (2, 4), (1, 4)]
+    p = starting_snake()
     d = 1
 
     fx, fy = spawn_food(p)
