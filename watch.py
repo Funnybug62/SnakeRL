@@ -69,7 +69,5 @@ def watch(path):
     pygame.quit()
 
 if __name__ == "__main__":
-    # run with: python watch.py            (uses q_table.json)
-    #       or: python watch.py other.json (to watch a different saved table)
     path = sys.argv[1] if len(sys.argv) > 1 else "q_table.json"
     watch(path)
