@@ -128,6 +128,29 @@ def step(positions, direction, fp):
     else:
         return (0, fp, False)
 
+def dfs(positions, sp): 
+    hx, hy = sp
+    tx, ty = positions[-1] 
+    visited = set() 
+    stack = [(hx, hy)] 
+    
+    while stack: 
+        cur = stack.pop() 
+        if cur not in visited: 
+            visited.add(cur)
+            cx, cy = cur 
+            
+            for D in range(4):
+                nx = cx+DIRECTION_OFFSETS[D][0]
+                ny = cy+DIRECTION_OFFSETS[D][1]
+
+                if nx >= 0 and nx < GRID_WIDTH and ny >= 0 and ny < GRID_HEIGHT:
+                    if nx == tx and ny == ty:
+                        return True
+                    elif (nx, ny) not in positions:
+                        stack.append((nx, ny))
+    return False
+
 def state(positions, direction, fp):
     fx, fy = fp 
     hx, hy = positions[0]
@@ -135,34 +158,72 @@ def state(positions, direction, fp):
     # first 3 bits are danger: straight right left 
     # next 4 bits are current direction: right down left up
     # next 4 bits are food position: left right up down
-    #        0  1  2  3  4  5  6  7  8  9  10
-    #        1  2  3  1  2  3  4  1  2  3  4
-    bits = [0]*11
+    #        0  1  2  3  4  5  6  7  8  9  10 11 12 13
+    #        1  2  3  1  2  3  4  1  2  3  4  1  2  3
+    bits = [0]*14
 
     bits[3+direction] = 1
 
-    if dead(positions, hx+DIRECTION_OFFSETS[direction][0], hy+DIRECTION_OFFSETS[direction][1]):
+    sx, sy = (hx+DIRECTION_OFFSETS[direction][0], hy+DIRECTION_OFFSETS[direction][1])
+    rx, ry = (hx+DIRECTION_OFFSETS[(direction+1)%4][0], hy+DIRECTION_OFFSETS[(direction+1)%4][1])
+    lx, ly = (hx+DIRECTION_OFFSETS[(direction-1)%4][0], hy+DIRECTION_OFFSETS[(direction-1)%4][1])
+
+    straight = right = left = True
+
+    if dead(positions, sx, sy):
         bits[0] = 1
-    if dead(positions, hx+DIRECTION_OFFSETS[(direction+1)%4][0], hy+DIRECTION_OFFSETS[(direction+1)%4][1]):
+        straight = False
+    if dead(positions, rx, ry):
         bits[1] = 1
-    if dead(positions, hx+DIRECTION_OFFSETS[(direction-1)%4][0], hy+DIRECTION_OFFSETS[(direction-1)%4][1]):
+        right = False
+    if dead(positions, lx, ly):
         bits[2] = 1
+        left = False
+
+
+    if straight:
+        copy = positions[:]
+        copy.insert(0, (sx, sy))
+        if (sx, sy) != fp:
+            del copy[-1]
+
+        if dfs(copy, copy[0]):
+            bits[11] = 1
+    if right:
+        copy = positions[:]
+        copy.insert(0, (rx, ry))
+        if (rx, ry) != fp:
+            del copy[-1]
+
+        if dfs(copy, copy[0]):
+            bits[12] = 1
+    if left:
+        copy = positions[:]
+        copy.insert(0, (lx, ly))
+        if (lx, ly) != fp:
+            del copy[-1]
+
+        if dfs(copy, copy[0]):
+            bits[13] = 1
+        
     
-    if hy > fy:
-        bits[9] = 1
-    elif hy < fy:
-        bits[10] = 1
+    
     if hx > fx:
         bits[7] = 1
     elif hx < fx:
         bits[8] = 1
+    if hy > fy:
+        bits[9] = 1
+    elif hy < fy:
+        bits[10] = 1
+    
 
     return tuple(bits)
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE))
-    pygame.display.set_caption("testotesto")
+    pygame.display.set_caption("testio")
     clock = pygame.time.Clock()
     # this is a list of tuples. feel free to ask if you have questions about it!
     # the front of the list (0 indexed) is going to be the head
