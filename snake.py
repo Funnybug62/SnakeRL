@@ -45,14 +45,19 @@ def starting_snake():
 # the front of the list (0 indexed) is going to be the head
 positions = starting_snake()
 
-# for this project we will be using numbers for the orthogonal directions for simpolicity sake
-# more specifically, -1 => left; 1 => right; -2 => up; 2 => down
-direction = 1
-last_direction = 1
+# these are just some names for the directions so that its less confusing. note that its in clockwise order
+# so you can use modular arithmetic to rotate around
+RIGHT, DOWN, LEFT, UP = 0, 1, 2, 3
+
+# directional offsets in the same order as our enums
+DIRECTION_OFFSETS = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+
+direction = RIGHT
+last_direction = RIGHT
 
 def reset():
     p = starting_snake()
-    d = 1
+    d = RIGHT
 
     fx, fy = spawn_food(p)
     return p, d, fx, fy, 0
@@ -77,35 +82,58 @@ def dead(positions, nx, ny):
 
 def step(positions, direction, fp):
     fx, fy = fp
-    if (direction == 1):
-        hx, hy = positions[0]
-        nx = hx+1
-        ny = hy
-    if (direction == -1):
-        hx, hy = positions[0]
-        nx = hx-1
-        ny = hy
-    if (direction == 2):
-        hx, hy = positions[0]
-        nx = hx
-        ny = hy+1
-    if (direction == -2):
-        hx, hy = positions[0]
-        nx = hx
-        ny = hy-1
+    hx, hy = positions[0]
+    dx, dy = DIRECTION_OFFSETS[direction]
+    nx = hx + dx
+    ny = hy + dy
 
+    ate = False
     if (nx, ny) != (fx, fy):
         del positions[-1]
     else:
         fx, fy = spawn_food(positions)
-        return (10, (fx, fy), False)
+        ate = True
 
     if dead(positions, nx, ny):
         return (-10, fp, True)
         
     positions.insert(0, (nx, ny))
 
-    return (0, fp, False)
+    if ate:
+        return (10, (fx, fy), False)
+    else:
+        return (0, fp, False)
+
+def state(positions, direction, fp):
+    fx, fy = fp 
+    hx, hy = positions[0]
+
+    # first 3 bits are danger: straight right left 
+    # next 4 bits are current direction: right down left up
+    # next 4 bits are food position: left right up down
+    #        0  1  2  3  4  5  6  7  8  9  10
+    #        1  2  3  1  2  3  4  1  2  3  4
+    bits = []
+
+    bits[3+direction] = 1
+
+    if dead(positions, hx+DIRECTION_OFFSETS[direction][0], hy+DIRECTION_OFFSETS[direction][1]):
+        bits[0] = 1
+    if dead(positions, hx+DIRECTION_OFFSETS[(direction+1)%4][0], hy+DIRECTION_OFFSETS[(direction+1)%4][1]):
+        bits[1] = 1
+    if dead(positions, hx+DIRECTION_OFFSETS[(direction-1)%4][0], hy+DIRECTION_OFFSETS[(direction-1)%4][1]):
+        bits[2] = 1
+    
+    if hy > fy:
+        bits[9] = 1
+    elif hy < fy:
+        bits[10] = 1
+    if hx > fx:
+        bits[7] = 1
+    elif hx < fx:
+        bits[8] = 1
+
+    return tuple(bits)
 
 score = 0
 
@@ -116,14 +144,14 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            if event.key == pygame.K_w and last_direction != 2:
-                direction = -2
-            elif event.key == pygame.K_s and last_direction != -2:
-                direction = 2
-            elif event.key == pygame.K_a and last_direction != 1:
-                direction = -1
-            elif event.key == pygame.K_d and last_direction != -1:
-                direction = 1
+            if event.key == pygame.K_w and last_direction != DOWN:
+                direction = UP
+            elif event.key == pygame.K_s and last_direction != UP:
+                direction = DOWN
+            elif event.key == pygame.K_a and last_direction != RIGHT:
+                direction = LEFT
+            elif event.key == pygame.K_d and last_direction != LEFT:
+                direction = RIGHT
 
     last_direction = direction
     

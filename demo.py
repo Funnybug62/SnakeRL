@@ -29,9 +29,9 @@ def starting_snake():
 positions = starting_snake()
 
 # for this project we will be using numbers for the orthogonal directions for simpolicity sake
-# more specifically, -1 => left; 1 => right; -2 => up; 2 => down
-direction = 1
-last_direction = 1
+# they go clockwise: 0 => right; 1 => down; 2 => left; 3 => up
+direction = 0
+last_direction = 0
 
 def draw_grid(surface):
     for x in range(0, GRID_WIDTH * CELL_SIZE, CELL_SIZE):
