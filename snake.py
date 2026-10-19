@@ -44,7 +44,6 @@ def starting_snake():
 # this is a list of tuples. feel free to ask if you have questions about it!
 # the front of the list (0 indexed) is going to be the head
 positions = starting_snake()
-positions = starting_snake()
 
 # for this project we will be using numbers for the orthogonal directions for simpolicity sake
 # more specifically, -1 => left; 1 => right; -2 => up; 2 => down
@@ -53,11 +52,10 @@ last_direction = 1
 
 def reset():
     p = starting_snake()
-    p = starting_snake()
     d = 1
 
     fx, fy = spawn_food(p)
-    return p, d, fx, fy
+    return p, d, fx, fy, 0
 
 def spawn_food(positions):
     fx = random.randint(0, GRID_WIDTH - 1)
@@ -70,6 +68,46 @@ def spawn_food(positions):
     return (fx, fy)
 
 fx, fy = spawn_food(positions)
+
+def dead(positions, nx, ny):
+    hit_wall = nx < 0 or nx >= GRID_WIDTH or ny < 0 or ny >= GRID_HEIGHT
+    hit_self = (nx, ny) in positions
+
+    return hit_wall or hit_self
+
+def step(positions, direction, fp):
+    fx, fy = fp
+    if (direction == 1):
+        hx, hy = positions[0]
+        nx = hx+1
+        ny = hy
+    if (direction == -1):
+        hx, hy = positions[0]
+        nx = hx-1
+        ny = hy
+    if (direction == 2):
+        hx, hy = positions[0]
+        nx = hx
+        ny = hy+1
+    if (direction == -2):
+        hx, hy = positions[0]
+        nx = hx
+        ny = hy-1
+
+    if (nx, ny) != (fx, fy):
+        del positions[-1]
+    else:
+        fx, fy = spawn_food(positions)
+        return (10, (fx, fy), False)
+
+    if dead(positions, nx, ny):
+        return (-10, fp, True)
+        
+    positions.insert(0, (nx, ny))
+
+    return (0, fp, False)
+
+score = 0
 
 while running:
     for event in pygame.event.get():
@@ -89,35 +127,14 @@ while running:
 
     last_direction = direction
     
-    if (direction == 1):
-        hx, hy = positions[0]
-        nx = hx+1
-        ny = hy
-    if (direction == -1):
-        hx, hy = positions[0]
-        nx = hx-1
-        ny = hy
-    if (direction == 2):
-        hx, hy = positions[0]
-        nx = hx
-        ny = hy+1
-    if (direction == -2):
-        hx, hy = positions[0]
-        nx = hx
-        ny = hy-1
-    positions.insert(0, (nx, ny))
-    if (nx, ny) != (fx, fy):
-        del positions[-1]
-    else:
-        fx, fy = spawn_food(positions)
+    reward, fp, gameover = step(positions, direction, (fx, fy))
+    score += reward
 
-    hit_wall = nx < 0 or nx >= GRID_WIDTH or ny < 0 or ny >= GRID_HEIGHT
-    hit_self = positions.count((nx, ny)) > 1
+    fx, fy = fp
 
-    if hit_wall or hit_self:
-        positions, direction, fx, fy = reset()
+    if gameover:
+        positions, direction, fx, fy, score = reset()
         last_direction = direction
-    
 
     screen.fill(BACKGROUND_COLOR)
     draw_positions(screen, positions)
