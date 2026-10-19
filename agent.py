@@ -1,3 +1,4 @@
+import json
 import random
 
 class Agent:
@@ -47,5 +48,20 @@ class Agent:
         else:
             target = reward + self.gamma * max(self.get_q(next_state))
 
-        self.Q[state][action] += self.alpha * (target - cur_guess)  
-        
+        self.Q[state][action] += self.alpha * (target - cur_guess)
+
+    # saves the Q-table to a JSON file. JSON keys have to be strings, so each state
+    # tuple like (1, 0, 0, 1, ...) is written as "1001..." -- you can open the file and read it!
+    def save(self, path):
+        table = {"".join(str(bit) for bit in state): values for state, values in self.Q.items()}
+
+        with open(path, "w") as f:
+            json.dump({"epsilon": self.epsilon, "Q": table}, f, indent=1)
+
+    # loads a Q-table saved by save(), turning the "1001..." strings back into tuples
+    def load(self, path):
+        with open(path) as f:
+            data = json.load(f)
+
+        self.epsilon = data["epsilon"]
+        self.Q = {tuple(int(bit) for bit in key): values for key, values in data["Q"].items()}

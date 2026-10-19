@@ -2,9 +2,9 @@ import pygame
 import random
 import sys
 
-CELL_SIZE = 80
-GRID_WIDTH = 10
-GRID_HEIGHT = 10
+CELL_SIZE = 40
+GRID_WIDTH = 15
+GRID_HEIGHT = 15
 
 BACKGROUND_COLOR = (170, 215, 80)
 GRID_COLOR = (150, 195, 65)
@@ -110,8 +110,6 @@ def step(positions, direction, fp):
     dx, dy = DIRECTION_OFFSETS[direction]
     nx = hx + dx
     ny = hy + dy
-
-    positions.insert(0, (nx, ny))
 
     ate = False
     if (nx, ny) != (fx, fy):
