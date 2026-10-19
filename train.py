@@ -50,7 +50,7 @@ def train(episodes, a):
 
 def main():
     a = Agent()
-    train(500, a)
+    train(1000, a)
     a.save("q_table.json")
 
 if __name__ == "__main__":
