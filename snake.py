@@ -1,6 +1,5 @@
 import pygame
 import random
-import sys
 
 CELL_SIZE = 40
 GRID_WIDTH = 15
@@ -18,13 +17,14 @@ RIGHT, DOWN, LEFT, UP = 0, 1, 2, 3
 # directional offsets in the same order as our enums
 DIRECTION_OFFSETS = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
+# 1
 def draw_grid(surface):
     for x in range(0, GRID_WIDTH * CELL_SIZE, CELL_SIZE):
         pygame.draw.line(surface, GRID_COLOR, (x, 0), (x, GRID_HEIGHT * CELL_SIZE))
     for y in range(0, GRID_HEIGHT * CELL_SIZE, CELL_SIZE):
         pygame.draw.line(surface, GRID_COLOR, (0, y), (GRID_WIDTH * CELL_SIZE, y))
 
-
+# 2
 def draw_positions(surface, positions):
     for x, y in positions:
         rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
@@ -61,18 +61,21 @@ def draw_eyes(surface, head, direction, fp):
 
         pygame.draw.circle(surface, (0, 0, 0), (px, py), pupil_radius)
 
+# 3
 def draw_food(surface, fp):
     fx, fy = fp
 
     rect = pygame.Rect(fx * CELL_SIZE, fy * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     pygame.draw.rect(surface, FOOD_COLOR, rect)
 
+# 4
 def starting_snake():
     cx = GRID_WIDTH // 2
     cy = GRID_HEIGHT // 2
 
     return [(cx, cy), (cx - 1, cy), (cx - 2, cy)]
 
+# 5
 def action_to_direction(action, direction):
     if action == 1:
         return (direction + 1) % 4
@@ -81,6 +84,7 @@ def action_to_direction(action, direction):
 
     return direction
 
+# 6
 def reset():
     p = starting_snake()
     d = RIGHT
@@ -88,6 +92,7 @@ def reset():
     fx, fy = spawn_food(p)
     return p, d, fx, fy, 0
 
+# 7
 def spawn_food(positions):
     fx = random.randint(0, GRID_WIDTH - 1)
     fy = random.randint(0, GRID_HEIGHT - 1)   
@@ -98,12 +103,14 @@ def spawn_food(positions):
 
     return (fx, fy)
 
+# 8
 def dead(positions, nx, ny):
     hit_wall = nx < 0 or nx >= GRID_WIDTH or ny < 0 or ny >= GRID_HEIGHT
     hit_self = (nx, ny) in positions
 
     return hit_wall or hit_self
 
+# 9
 def step(positions, direction, fp):
     fx, fy = fp
     hx, hy = positions[0]
@@ -151,6 +158,7 @@ def dfs(positions, sp):
                         stack.append((nx, ny))
     return False
 
+# 10
 def state(positions, direction, fp):
     fx, fy = fp 
     hx, hy = positions[0]
